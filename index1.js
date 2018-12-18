@@ -5,7 +5,7 @@
 
 
 const Five = require('johnny-five');
-var board = new Five.Board({ port: '/dev/tty.wchusbserial1d160' })
+var board = new Five.Board({ port: '/dev/tty.wchusbserial1d130' })
 
 const A = 2, B = 3, C = 4, D = 5, E = 6, F = 7, G = 8, H = 9;
 const X = 10, Y = 11, Z = 12;
@@ -13,7 +13,7 @@ const X = 10, Y = 11, Z = 12;
 const LOWPins = [A, B, C, D, E, F, G, H];
 const HIGHPins = [Z, Y, X]
 
-const refashSpeed = 10;  // 3ms*3 刷新率会有延迟；10ms> speed >8ms 两位正常 三位闪；  >10ms 两位闪 
+const refashSpeed = 4;
 
 // 定义灯管编码
 const ledsCode = [
@@ -48,7 +48,7 @@ board.on("ready", () => {
     }
 
     let number = 0;
-    board.loop(1000, () => {
+    board.loop(100, () => {
         refash(String(number));
         number++;
     })
@@ -59,6 +59,10 @@ board.on("ready", () => {
         let i = 0;
         clearInterval(timer)
         timer = setInterval(function () {
+            board.digitalWrite(X, false);
+            board.digitalWrite(Y, false);
+            board.digitalWrite(Z, false);
+            light.call(board, ledsCode[str[i]])
             if (len === 1) {
                 board.digitalWrite(X, true)
             }
@@ -67,12 +71,8 @@ board.on("ready", () => {
                 board.digitalWrite(Y, HIGHPins[i] === Z ? true : false)
             }
             if (len === 3) {
-                board.digitalWrite(X, HIGHPins[i] === X ? true : false)
-                board.digitalWrite(Y, HIGHPins[i] === Y ? true : false)
-                board.digitalWrite(Z, HIGHPins[i] === Z ? true : false)
+                board.digitalWrite(HIGHPins[i], true)
             }
-            light.call(board, ledsCode[str[i]])
-            light.call(board, ledsCode[10])
             if (i === (len - 1)) { i = -1 };
             i++;
         }, refashSpeed);
