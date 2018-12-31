@@ -13,7 +13,7 @@ const X = 10, Y = 11, Z = 12;
 const LOWPins = [A, B, C, D, E, F, G, H];
 const HIGHPins = [Z, Y, X]
 
-const refashSpeed = 4;
+const refashSpeed = 8;  // 3ms*3 刷新率会有延迟；10ms> speed >8ms 两位正常 三位闪；  >10ms 两位闪 
 
 // 定义灯管编码
 const ledsCode = [

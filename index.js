@@ -1,19 +1,20 @@
 
 /**
  * 数码管单位显示（0-9）
+ * 电子骰子（简易版）
  */
 
 const Five = require('johnny-five');
-var board = new Five.Board({ port: '/dev/tty.wchusbserial1d160' })
+var board = new Five.Board({ port: '/dev/tty.wchusbserial1d1320' })
 
 const A = 2, B = 3, C = 4, D = 5, E = 6, F = 7, G = 8, H = 9;
-const X = 10, Y = 11, Z = 12;
+// const X = 10;
 
 const LOWPins = [A, B, C, D, E, F, G, H];
-const HIGHPins = [X, Y, Z]
+// const HIGHPins = [X]
 
 // 定义灯管编码
-const ledsCode = [
+const ledCode = [
     "0000001",  // 0
     "1001111",  // 1
     "0010010",  // 2
@@ -29,26 +30,50 @@ const ledsCode = [
 board.on("ready", () => {
 
     LOWPins.forEach(pin => board.pinMode(pin, board.MODES.OUTPUT));
-    HIGHPins.forEach(pin => board.pinMode(pin, board.MODES.OUTPUT));
+    // HIGHPins.forEach(pin => board.pinMode(pin, board.MODES.OUTPUT));
 
-    board.digitalWrite(X, true);
+    // board.digitalWrite(X, true);
+    var button = new Five.Button({ pin: 12, invert: false })
 
     light = function (ledCode) {
-        this.digitalWrite(A, Number(ledCode[0]));
-        this.digitalWrite(B, Number(ledCode[1]));
-        this.digitalWrite(C, Number(ledCode[2]));
-        this.digitalWrite(D, Number(ledCode[3]));
-        this.digitalWrite(E, Number(ledCode[4]));
-        this.digitalWrite(F, Number(ledCode[5]));
-        this.digitalWrite(G, Number(ledCode[6]));
+        this.digitalWrite(A, !Number(ledCode[0]));
+        this.digitalWrite(B, !Number(ledCode[1]));
+        this.digitalWrite(C, !Number(ledCode[2]));
+        this.digitalWrite(D, !Number(ledCode[3]));
+        this.digitalWrite(E, !Number(ledCode[4]));
+        this.digitalWrite(F, !Number(ledCode[5]));
+        this.digitalWrite(G, !Number(ledCode[6]));
     }
 
     let number = 0;
-    board.loop(1000, () => {
-        if (number > 9) { number = 0; }
-        light.call(board, ledsCode[number]);
-        number++;
+
+    function pressBtn() {
+        let len =50|| Math.ceil(Math.random() * 100)
+        let num = 0;
+        var timer = setInterval(() => {
+            if (num > len) { clearInterval(timer) }
+            let number = (Math.floor(Math.random() * 10)%5+1)
+            light.call(board, ledCode[number]);
+            num++;
+        }, 100);
+    }
+    light.call(board, ledCode[0]);
+
+    board.repl.inject({
+        button: button
     })
 
+    button.on('down', function () {
+        console.log('down')
+        pressBtn();
+    })
+    button.on('hold', function () {
+        console.log('hold')
+        // pressBtn();
+    })
+    button.on('up', function () {
+        console.log('up')
+        // pressBtn();
+    })
 
 })
