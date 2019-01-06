@@ -45,19 +45,20 @@ board.on("ready", () => {
         this.digitalWrite(G, !Number(ledCode[6]));
     }
     const Buzzer = {
-        timer,
 
-        run = function () {
+        run: function () {
             let isBuzzer = false;
-            buzzer = setInterval(() => {
+            this.timer = setInterval(() => {
                 this.digitalWrite(buzzerPin, (isBuzzer ? true : false));
                 isBuzzer = !isBuzzer;
             }, 1000);
         },
 
-        stop = function () {
+        stop: function () {
+            if(this.timer){
+                clearInterval(this.timer)
+            }
             this.digitalWrite(buzzerPin, false);
-            clearInterval(buzzer)
         }
     }
 
