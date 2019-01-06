@@ -8,7 +8,7 @@ const Five = require('johnny-five');
 var board = new Five.Board({ port: '/dev/tty.wchusbserial1d1320' })
 
 const A = 2, B = 3, C = 4, D = 5, E = 6, F = 7, G = 8, H = 9;
-// const X = 10;
+const buzzerPin = 11;
 
 const LOWPins = [A, B, C, D, E, F, G, H];
 // const HIGHPins = [X]
@@ -44,15 +44,34 @@ board.on("ready", () => {
         this.digitalWrite(F, !Number(ledCode[5]));
         this.digitalWrite(G, !Number(ledCode[6]));
     }
+    const Buzzer = {
+        timer,
 
-    let number = 0;
+        run = function () {
+            let isBuzzer = false;
+            buzzer = setInterval(() => {
+                this.digitalWrite(buzzerPin, (isBuzzer ? true : false));
+                isBuzzer = !isBuzzer;
+            }, 1000);
+        },
+
+        stop = function () {
+            this.digitalWrite(buzzerPin, false);
+            clearInterval(buzzer)
+        }
+    }
 
     function pressBtn() {
-        let len =50|| Math.ceil(Math.random() * 100)
+        let len = 50 || Math.ceil(Math.random() * 100)
         let num = 0;
         var timer = setInterval(() => {
-            if (num > len) { clearInterval(timer) }
-            let number = (Math.floor(Math.random() * 10)%5+1)
+            let number = (Math.floor(Math.random() * 10) % 5 + 1)
+            if (num > len) {
+                clearInterval(timer);
+                if (number > 3) {
+                    Buzzer.run.call(board)
+                }
+            }
             light.call(board, ledCode[number]);
             num++;
         }, 100);
@@ -66,6 +85,7 @@ board.on("ready", () => {
     button.on('down', function () {
         console.log('down')
         pressBtn();
+        Buzzer.stop.call(board)
     })
     button.on('hold', function () {
         console.log('hold')
